@@ -1,0 +1,72 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "vector_cve2",
+  target_dir: "vector_cve2",
+
+  // Git upstream source code repository
+  upstream: {
+    // Upstream Git repository URL. HTTPS URLs are preferred.
+    url: "https://github.com/alessiocaviglia/cve2.git",
+    // Upstream revision or branch. Can be a commit hash or a branch name.
+    rev: "main",
+  },
+
+  // Optional: Exclude files or directories from the upstream sources
+  // The standard glob wildcards (*, ?, etc.) are supported.
+  exclude_from_upstream: [
+    "ci",
+    "dv",
+    "examples",
+    "formal",
+    ".dir-locals.el",
+    "doc",
+    "shared",
+    "syn",
+    "util",
+    "scripts",
+    "vendor/eembc_coremark",
+    "vendor/eembc_coremark.lock.hjson",
+    "vendor/google_riscv-dv",
+    "vendor/google_riscv-dv.lock.hjson",
+    "vendor/google_riscv-dv.vendor.hjson",
+    "vendor/lowrisc_ip.lock.hjson",
+    "vendor/lowrisc_ip.vendor.hjson",
+    "vendor/patches",
+    "vendor/lowrisc_ip/ip"
+    "vendor/lowrisc_ip/lint"
+    "vendor/lowrisc_ip/util"
+    "vendor/lowrisc_ip/dv/tools",
+    "vendor/lowrisc_ip/dv/verilator",
+    "vendor/lowrisc_ip/dv/sv/common_ifs",
+    "vendor/lowrisc_ip/dv/sv/csr_utils",
+    "vendor/lowrisc_ip/dv/sv/dv_base_reg",
+    "vendor/lowrisc_ip/dv/sv/dv_lib",
+    "vendor/lowrisc_ip/dv/sv/mem_bkdr_util",
+    "vendor/lowrisc_ip/dv/sv/mem_model",
+    "vendor/lowrisc_ip/dv/sv/str_utils",
+    ".github",
+    "azure-pipelines.yml",
+    "check_tool_requirements.core",
+    ".clang-format",
+    "CONTRIBUTING.md",
+    "CREDITS.md",
+    ".gitignore",
+    "ibex_configs.yaml",
+    "LICENSE",
+    "Makefile",
+    "python-requirements.txt",
+    "README.md",
+    "src_files.yml",
+    ".svlint.toml",
+    "ibex_icache.core",
+    "ibex_multdiv.core",
+    "ibex_top.core",
+    "ibex_top_tracing.core",
+    "ibex_tracer.core",
+    "tool_requirements.py",
+    "tb",
+    "schematics"
+  ]
+}

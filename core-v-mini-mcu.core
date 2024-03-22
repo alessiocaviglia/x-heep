@@ -13,7 +13,8 @@ filesets:
     - x-heep::packages
     - openhwgroup.org:ip:cv32e40p
     - openhwgroup.org:ip:cv32e40x
-    - openhwgroup:cve2:cve2_top
+    #- openhwgroup:cve2:cve2_top
+    - alessiocaviglia:vcve2:vcve2_top
     - esl_epfl:ip:cv32e40px
     - pulp-platform.org:ip:gpio
     - pulp-platform.org::common_cells
@@ -378,7 +379,7 @@ targets:
           - '--exe tb_top.cpp'
           - '-CFLAGS "-std=c++11 -Wall -g -fpermissive"'
           - '-LDFLAGS "-pthread -lutil -lelf"'
-          - "-Wall"
+          #- "-Wall"
 
   nexys-a7-100t:
     <<: *default_target

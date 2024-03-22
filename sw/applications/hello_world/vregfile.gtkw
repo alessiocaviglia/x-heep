@@ -1,0 +1,46 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Wed Mar 20 13:22:01 2024
+[*]
+[dumpfile] "/home/alessio99/tristan/x-heep/build/openhwgroup.org_systems_core-v-mini-mcu_0/sim-verilator/waveform.vcd"
+[dumpfile_mtime] "Wed Mar 20 13:14:44 2024"
+[dumpfile_size] 111699305
+[savefile] "/home/alessio99/tristan/x-heep/sw/applications/hello_world/vregfile.gtkw"
+[timestart] 118275
+[size] 1848 1016
+[pos] -51 -51
+*-3.507317 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.testharness.
+[treeopen] TOP.testharness.x_heep_system_i.
+[treeopen] TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.
+[treeopen] TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.
+[treeopen] TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.
+[treeopen] TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.
+[treeopen] TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.
+[sst_width] 417
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 289
+@28
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.clk_i
+@200
+-ID stage
+@22
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.id_stage_i.instr_rdata_i[31:0]
+@100000028
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.id_stage_i.id_fsm_q
+@28
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.id_stage_i.multicycle_done
+@200
+-VRF
+@28
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.req_i
+@22
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.rdata_a_o[127:0]
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.rdata_b_o[127:0]
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.rdata_c_o[127:0]
+@28
+TOP.testharness.x_heep_system_i.core_v_mini_mcu_i.cpu_subsystem_i.gen_cv32e20.cv32e20_i.u_cve2_core.vregfile_wrapper_inst.vector_done_o
+[pattern_trace] 1
+[pattern_trace] 0
