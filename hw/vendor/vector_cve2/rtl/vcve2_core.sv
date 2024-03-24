@@ -272,14 +272,21 @@ module vcve2_core import vcve2_pkg::*; #(
   // for RVFI
   logic        illegal_insn_id, unused_illegal_insn_id; // ID stage sees an illegal instruction
 
+  // Vector EX Block
+  logic [31:0] vec_result_ex;
   // Vector Register File
   logic vrf_req; // Request signal for the vector register file
-  logic vrf_we; // Write enable signal for the vector register file
-  logic [127:0] vrf_wdata; // Write data for the vector register file
-  logic [127:0] vrf_rdata_a; // First read port of vector register file
-  logic [127:0] vrf_rdata_b; // Second read port of vector register file
-  logic [127:0] vrf_rdata_c; // Third read port of vector register file
+  logic [31:0] vrf_rdata_a; // First read port of vector register file
+  logic [31:0] vrf_rdata_b; // Second read port of vector register file
+  logic [31:0] vrf_rdata_c; // Third read port of vector register file
+  logic [1:0] vrf_num_operands; // Number of operands needed for current vector operation
   logic vector_done; // Signal indicating that the vector operation is done
+  // ID/WB
+  logic vrf_we_id; // Write enable signal for the vector register file
+  logic [31:0] vrf_wdata_id; // Write data for the vector register file
+  // WB/VRF
+  logic vrf_we_wb; // Write enable signal for the vector register file
+  logic [31:0] vrf_wdata_wb; // Write data for the vector register file
 
   //////////////////////
   // Clock management //
@@ -489,13 +496,17 @@ module vcve2_core import vcve2_pkg::*; #(
     .perf_div_wait_o  (perf_div_wait),
     .instr_id_done_o  (instr_id_done),
 
+    // vector write data to commit in the vector register file
+    .vec_result_ex_i(vec_result_ex),
+
     // Vector register file
     .vrf_req_o(vrf_req),
-    .vrf_we_o(vrf_we),
+    .vrf_we_id_o(vrf_we_id),
     .vrf_rdata_a_i(vrf_rdata_a),
     .vrf_rdata_b_i(vrf_rdata_b),
     .vrf_rdata_c_i(vrf_rdata_c),
-    .vrf_wdata_o(vrf_wdata),
+    .vrf_wdata_o(vrf_wdata_id),
+    .vrf_num_operands_o(vrf_num_operands),
     .vector_done_i(vector_done)
   );
 
@@ -538,6 +549,21 @@ module vcve2_core import vcve2_pkg::*; #(
     .branch_decision_o(branch_decision),  // to ID
 
     .ex_valid_o(ex_valid)
+  );
+
+  /////////////////////
+  // Vector EX Block //
+  /////////////////////
+
+  vcve2_vex_block #(
+  ) vex_block_i (
+    .clk_i (clk_i),
+    .rst_ni(rst_ni),
+
+    // Register file input
+    .rf_rdata_a_i(alu_operand_a_ex),
+    // Output wb value
+    .vec_result_ex_o(vec_result_ex)
   );
 
   /////////////////////
@@ -592,7 +618,7 @@ module vcve2_core import vcve2_pkg::*; #(
     .perf_store_o(perf_store)
   );
 
-  cve2_wb #(
+  vcve2_wb #(
   ) wb_i (
     .clk_i   (clk_i),
     .rst_ni  (rst_ni),
@@ -616,7 +642,13 @@ module vcve2_core import vcve2_pkg::*; #(
     .rf_we_wb_o   (rf_we_wb),
 
     .lsu_resp_valid_i(lsu_resp_valid),
-    .lsu_resp_err_i  (lsu_resp_err)
+    .lsu_resp_err_i  (lsu_resp_err),
+
+    // VRF signals
+    .vrf_we_id_i   (vrf_we_id),
+    .vrf_wdata_id_i(vrf_wdata_id),
+    .vrf_we_wb_o   (vrf_we_wb),
+    .vrf_wdata_wb_o(vrf_wdata_wb)
   );
 
   ///////////////////////
@@ -682,14 +714,15 @@ module vcve2_core import vcve2_pkg::*; #(
   // VRF (Vector Register File) //
   ////////////////////////////////
   vregfile_wrapper #(
-    .DataWidth(128),
+    .VLEN(128),
+    .ELEN(32),
     .AddrWidth(5)
   ) vregfile_wrapper_inst (
     .clk_i(clk_i),
     .rst_ni(rst_ni),
 
     .req_i(vrf_req),
-    .we_i(vrf_we),
+    .we_i(vrf_we_wb),
 
     .raddr_a_i(rf_raddr_a),
     .raddr_b_i(rf_raddr_b),
@@ -698,8 +731,9 @@ module vcve2_core import vcve2_pkg::*; #(
     .rdata_c_o(vrf_rdata_c),
 
     .waddr_i(rf_waddr_wb),
-    .wdata_i(vrf_wdata),
+    .wdata_i(vrf_wdata_wb),
 
+    .num_operands_i(vrf_num_operands),
     .vector_done_o(vector_done)
   );
   

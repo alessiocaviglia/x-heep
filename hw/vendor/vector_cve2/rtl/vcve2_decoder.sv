@@ -93,7 +93,8 @@ module vcve2_decoder #(
 
   // vector extension
   output logic                 vrf_req_o,             // request to vector register file
-  output logic                 vrf_we_o              // write enable for vector register file
+  output logic                 vrf_we_o,              // write enable for vector register file
+  output logic[1:0]            vrf_num_operands_o
 );
 
   import vcve2_pkg::*;
@@ -232,6 +233,8 @@ module vcve2_decoder #(
 
     // vector extension
     vrf_req_o             = 1'b0;
+    vrf_we_o              = 1'b0;
+    vrf_num_operands_o = 2'b00;
 
     opcode                = opcode_e'(instr[6:0]);
 
@@ -652,7 +655,6 @@ module vcve2_decoder #(
 
       OPCODE_OP_V: begin  // Vector Operations
         vrf_req_o = 1'b1;
-        vrf_we_o = 1'b0;  // to remove later
         unique case ({instr[31:26], instr[14:12]})  // {funct6, funct3}
           // Vector Integer Arithmetic Operations
           {6'b00_0000, 3'b000}: begin    // vadd.vv
@@ -668,6 +670,8 @@ module vcve2_decoder #(
           {6'b01_0111, 3'b000}: begin    // vmv.v.v/vmerge.vvm
           end
           {6'b01_0111, 3'b100}: begin    // vmv.v.x/vmerge.vxm
+            vrf_we_o = 1'b1;
+            vrf_num_operands_o = 2'b00;
           end
           {6'b01_0111, 3'b011}: begin    // vmv.v.i/vmerge.vim
           end
@@ -1226,6 +1230,7 @@ module vcve2_decoder #(
           {6'b01_0111, 3'b000}: begin    // vmv.v.v/vmerge.vvm
           end
           {6'b01_0111, 3'b100}: begin    // vmv.v.x/vmerge.vxm
+            alu_op_a_mux_sel_o = OP_A_REG_A;  // send to EX stage the content of x register
           end
           {6'b01_0111, 3'b011}: begin    // vmv.v.i/vmerge.vim
           end

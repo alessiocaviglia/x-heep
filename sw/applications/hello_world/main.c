@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     printf("hello world!\n");
 
     // I execute a custom asm instruction 0x001101D7
-    asm volatile(".word 0x001101D7");
+    asm volatile(".word 0x5C00C0D7");
 
     return EXIT_SUCCESS;
 }

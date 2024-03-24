@@ -152,19 +152,22 @@ module vcve2_id_stage #(
   output logic                      perf_div_wait_o,
   output logic                      instr_id_done_o,
 
+  // Vector writeback signals
+  input  logic [31:0]               vec_result_ex_i,
   // Vector register file
   output logic                      vrf_req_o,
-  output logic                      vrf_we_o,
-  input  logic [127:0]              vrf_rdata_b_i,
-  input  logic [127:0]              vrf_rdata_a_i,
-  input  logic [127:0]              vrf_rdata_c_i,
-  output logic [127:0]              vrf_wdata_o,    // read port
+  output logic                      vrf_we_id_o,
+  input  logic [31:0]               vrf_rdata_b_i,
+  input  logic [31:0]               vrf_rdata_a_i,
+  input  logic [31:0]               vrf_rdata_c_i,
+  output logic [31:0]               vrf_wdata_o,
+  output logic [1:0]                vrf_num_operands_o,
   input  logic                      vector_done_i
 
 );
 
-  // TODO: remove it
-  assign vrf_wdata_o = 128'h0;
+  // TODO: now it's only this but I will add things probably while adding supported instructions
+  assign vrf_wdata_o = vec_result_ex_i;
 
   import vcve2_pkg::*;
 
@@ -425,7 +428,8 @@ module vcve2_id_stage #(
 
     // Vector instructions
     .vrf_req_o(vrf_req_o),  // used both for VRF and to signal vector instructions since all of those who needs to stall uses VRF
-    .vrf_we_o(vrf_we_o)
+    .vrf_we_o(vrf_we_id_o),
+    .vrf_num_operands_o(vrf_num_operands_o)
     
   );
 

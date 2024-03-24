@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/alessiocaviglia/cve2.git
-    rev: 56d792766a1581a9c6580761cbc601c31909447c
+    rev: 4237121cad6e98bec92d74ad1eb888850b50500e
   }
 }

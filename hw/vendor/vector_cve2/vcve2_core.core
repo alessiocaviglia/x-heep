@@ -22,6 +22,7 @@ filesets:
       - rtl/vcve2_decoder.sv
       - rtl/cve2_ex_block.sv
       - rtl/cve2_fetch_fifo.sv
+      - rtl/vcve2_vex_block.sv
       - rtl/vcve2_id_stage.sv
       - rtl/cve2_if_stage.sv
       - rtl/cve2_load_store_unit.sv
@@ -29,7 +30,7 @@ filesets:
       - rtl/cve2_multdiv_slow.sv
       - rtl/cve2_prefetch_buffer.sv
       - rtl/cve2_pmp.sv
-      - rtl/cve2_wb.sv
+      - rtl/vcve2_wb.sv
       - rtl/ram_1p.sv
       - rtl/vregfile_wrapper.sv
       - rtl/vcve2_core.sv

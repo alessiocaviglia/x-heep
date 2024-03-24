@@ -12,7 +12,7 @@
 `include "prim_assert.sv"
 `include "dv_fcov_macros.svh"
 
-module cve2_wb #(
+module vcve2_wb #(
 ) (
   input  logic                     clk_i,
   input  logic                     rst_ni,
@@ -36,7 +36,13 @@ module cve2_wb #(
   output logic                     rf_we_wb_o,
 
   input logic                      lsu_resp_valid_i,
-  input logic                      lsu_resp_err_i
+  input logic                      lsu_resp_err_i,
+
+  // Vector extension
+  input logic                      vrf_we_id_i,
+  input logic [31:0]               vrf_wdata_id_i,
+  output logic                     vrf_we_wb_o,
+  output logic [31:0]              vrf_wdata_wb_o
 );
 
   import vcve2_pkg::*;
@@ -64,6 +70,11 @@ module cve2_wb #(
   assign rf_wdata_wb_o = ({32{rf_wdata_wb_mux_we[0]}} & rf_wdata_wb_mux[0]) |
                          ({32{rf_wdata_wb_mux_we[1]}} & rf_wdata_wb_mux[1]);
   assign rf_we_wb_o    = |rf_wdata_wb_mux_we;
+
+  // Vector extension
+  // later I will extend it with a multiplexer for load data (similar to the RF one above)
+  assign vrf_we_wb_o    = vrf_we_id_i;
+  assign vrf_wdata_wb_o = vrf_wdata_id_i;
 
   `ASSERT(RFWriteFromOneSourceOnly, $onehot0(rf_wdata_wb_mux_we))
 endmodule
