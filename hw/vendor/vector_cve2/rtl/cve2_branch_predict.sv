@@ -64,8 +64,6 @@ module cve2_branch_predict (
 
   assign imm_cb_type = { {23{instr[12]}}, instr[12], instr[6:5], instr[2], instr[11:10],
     instr[4:3], 1'b0};
-  
-  // henlo!
 
   // Determine if the instruction is a branch or a jump
 
