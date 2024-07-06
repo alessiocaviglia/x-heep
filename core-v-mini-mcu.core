@@ -13,8 +13,7 @@ filesets:
     - x-heep::packages
     - openhwgroup.org:ip:cv32e40p
     - openhwgroup.org:ip:cv32e40x
-    #- openhwgroup:cve2:cve2_top
-    - alessiocaviglia:vcve2:vcve2_top
+    - openhwgroup:cve2:cve2_top
     - esl_epfl:ip:cv32e40px
     - pulp-platform.org:ip:gpio
     - pulp-platform.org::common_cells

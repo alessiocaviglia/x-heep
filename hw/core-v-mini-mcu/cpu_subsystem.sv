@@ -106,7 +106,57 @@ module cpu_subsystem
     assign irq_ack_o = '0;
     assign irq_id_o  = '0;
 
+  end else if (CPU_TYPE == vcv32e20) begin : gen_vcv32e20
+
+    vcve2_top #(
+        .DmHaltAddr(DM_HALTADDRESS),
+        .DmExceptionAddr('0)
+    ) vcv32e20_i (
+        .clk_i (clk_i),
+        .rst_ni(rst_ni),
+
+        .test_en_i(1'b0),
+        .ram_cfg_i('0),
+
+        .hart_id_i  (32'h0),
+        .boot_addr_i(BOOT_ADDR),
+
+        .instr_addr_o  (core_instr_req_o.addr),
+        .instr_req_o   (core_instr_req_o.req),
+        .instr_rdata_i (core_instr_resp_i.rdata),
+        .instr_gnt_i   (core_instr_resp_i.gnt),
+        .instr_rvalid_i(core_instr_resp_i.rvalid),
+        .instr_err_i   (1'b0),
+
+        .data_addr_o  (core_data_req_o.addr),
+        .data_wdata_o (core_data_req_o.wdata),
+        .data_we_o    (core_data_req_o.we),
+        .data_req_o   (core_data_req_o.req),
+        .data_be_o    (core_data_req_o.be),
+        .data_rdata_i (core_data_resp_i.rdata),
+        .data_gnt_i   (core_data_resp_i.gnt),
+        .data_rvalid_i(core_data_resp_i.rvalid),
+        .data_err_i   (1'b0),
+
+        .irq_software_i(irq_i[3]),
+        .irq_timer_i   (irq_i[7]),
+        .irq_external_i(irq_i[11]),
+        .irq_fast_i    (irq_i[31:16]),
+        .irq_nm_i      (1'b0),
+
+        .debug_req_i (debug_req_i),
+        .crash_dump_o(),
+
+        .fetch_enable_i(fetch_enable),
+
+        .core_sleep_o
+    );
+
+    assign irq_ack_o = '0;
+    assign irq_id_o  = '0;
+
   end else if (CPU_TYPE == cv32e40x) begin : gen_cv32e40x
+
 
     // instantiate the core
     cv32e40x_core #(
