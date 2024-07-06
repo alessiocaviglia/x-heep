@@ -17,7 +17,7 @@ package core_v_mini_mcu_pkg;
 
   import addr_map_rule_pkg::*;
 
-  typedef enum logic [1:0] {
+  typedef enum logic [2:0] {
     cv32e40p,
     cv32e20,
     cv32e40x,
