@@ -5,7 +5,7 @@
 // Peripherals configuration for core-v-mini-mcu.
 {
 
-    cpu_type: cv32e20
+    cpu_type: vcv32e20
 
     bus_type: onetoM
 
