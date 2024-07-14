@@ -109,8 +109,10 @@ module cpu_subsystem
   end else if (CPU_TYPE == vcv32e20) begin : gen_vcv32e20
 
     vcve2_top #(
+`ifndef POST_SYN_SIM
         .DmHaltAddr(DM_HALTADDRESS),
         .DmExceptionAddr('0)
+`endif  // POST_SYN_SIM
     ) vcv32e20_i (
         .clk_i (clk_i),
         .rst_ni(rst_ni),
