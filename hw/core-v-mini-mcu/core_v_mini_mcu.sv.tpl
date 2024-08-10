@@ -216,8 +216,8 @@ ${pad.core_v_mini_mcu_interface}
       .rst_ni(cpu_subsystem_rst_n),
       .core_instr_req_o(core_instr_req),
       .core_instr_resp_i(core_instr_resp),
-      .core_data_req_o(core_data_req),
-      .core_data_resp_i(core_data_resp),
+      .core_data_req_o(core_data_req),        // transforma in vettore VEC[]
+      .core_data_resp_i(core_data_resp),      // transforma in vettore VEC[]
       .xif_compressed_if,
       .xif_issue_if,
       .xif_commit_if,
@@ -256,8 +256,8 @@ ${pad.core_v_mini_mcu_interface}
       .rst_ni,
       .core_instr_req_i(core_instr_req),
       .core_instr_resp_o(core_instr_resp),
-      .core_data_req_i(core_data_req),
-      .core_data_resp_o(core_data_resp),
+      .core_data_req_i(core_data_req),                          // VEC[0]
+      .core_data_resp_o(core_data_resp),                        // VEC[0]
       .debug_master_req_i(debug_master_req),
       .debug_master_resp_o(debug_master_resp),
       .dma_read_ch0_req_i(dma_read_ch0_req),
@@ -266,8 +266,8 @@ ${pad.core_v_mini_mcu_interface}
       .dma_write_ch0_resp_o(dma_write_ch0_resp),
       .dma_addr_ch0_req_i(dma_addr_ch0_req),
       .dma_addr_ch0_resp_o(dma_addr_ch0_resp),
-      .ext_xbar_master_req_i(ext_xbar_master_req_i),
-      .ext_xbar_master_resp_o(ext_xbar_master_resp_o),
+      .ext_xbar_master_req_i(ext_xbar_master_req_i),            // I primi n-2 rimangono come sono, aggiungine due elementi che saranno connessi a VEC[1] e VEC[2]
+      .ext_xbar_master_resp_o(ext_xbar_master_resp_o),          // I primi n-2 rimangono come sono, aggiungine due elementi che saranno connessi a VEC[1] e VEC[2]
       .ram_req_o(ram_slave_req),
       .ram_resp_i(ram_slave_resp),
       .debug_slave_req_o(debug_slave_req),
