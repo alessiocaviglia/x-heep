@@ -7,7 +7,8 @@ package testharness_pkg;
   import addr_map_rule_pkg::*;
   import core_v_mini_mcu_pkg::*;
 
-  localparam EXT_XBAR_NMASTER = 2;
+  // localparam EXT_XBAR_NMASTER = 2;
+  localparam EXT_XBAR_NMASTER = 4;      // added 2 ifs for the core
   localparam EXT_XBAR_NSLAVE = 1;
 
   //master idx

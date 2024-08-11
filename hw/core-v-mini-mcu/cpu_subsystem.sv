@@ -24,8 +24,16 @@ module cpu_subsystem
     input  obi_resp_t core_instr_resp_i,
 
     // Data memory interface
+`ifdef TWO_DATAIFS
+    output obi_req_t  [1:0] core_data_req_o,
+    input  obi_resp_t [1:0] core_data_resp_i,
+`elsif THREE_DATAIFS
+    output obi_req_t  [2:0] core_data_req_o,
+    input  obi_resp_t [2:0] core_data_resp_i,
+`else
     output obi_req_t  core_data_req_o,
     input  obi_resp_t core_data_resp_i,
+`endif
 
     // eXtension interface
     if_xif.cpu_compressed xif_compressed_if,
@@ -139,6 +147,37 @@ module cpu_subsystem
         .data_gnt_i   (core_data_resp_i.gnt),
         .data_rvalid_i(core_data_resp_i.rvalid),
         .data_err_i   (1'b0),
+
+`ifdef TWO_DATAIFS
+        .data_addr_o1  (core_data_req_o[1].addr),
+        .data_wdata_o1 (core_data_req_o[1].wdata),
+        .data_we_o1    (core_data_req_o[1].we),
+        .data_req_o1   (core_data_req_o[1].req),
+        .data_be_o1    (core_data_req_o[1].be),
+        .data_rdata_i1 (core_data_resp_i[1].rdata),
+        .data_gnt_i1   (core_data_resp_i[1].gnt),
+        .data_rvalid_i1(core_data_resp_i[1].rvalid),
+        .data_err_i1   (1'b0),
+`elsif THREE_DATAIFS
+        .data_addr_o1  (core_data_req_o[1].addr),
+        .data_wdata_o1 (core_data_req_o[1].wdata),
+        .data_we_o1    (core_data_req_o[1].we),
+        .data_req_o1   (core_data_req_o[1].req),
+        .data_be_o1    (core_data_req_o[1].be),
+        .data_rdata_i1 (core_data_resp_i[1].rdata),
+        .data_gnt_i1   (core_data_resp_i[1].gnt),
+        .data_rvalid_i1(core_data_resp_i[1].rvalid),
+        .data_err_i1   (1'b0),
+        .data_addr_o2  (core_data_req_o[2].addr),
+        .data_wdata_o2 (core_data_req_o[2].wdata),
+        .data_we_o2    (core_data_req_o[2].we),
+        .data_req_o2   (core_data_req_o[2].req),
+        .data_be_o2    (core_data_req_o[2].be),
+        .data_rdata_i2 (core_data_resp_i[2].rdata),
+        .data_gnt_i2   (core_data_resp_i[2].gnt),
+        .data_rvalid_i2(core_data_resp_i[2].rvalid),
+        .data_err_i2   (1'b0),
+`endif
 
         .irq_software_i(irq_i[3]),
         .irq_timer_i   (irq_i[7]),
