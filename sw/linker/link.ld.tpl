@@ -337,7 +337,7 @@ SECTIONS
 
 % if ram_numbanks_cont > 1 and ram_numbanks_il > 0:
   .data_interleaved :
-  {                   // . += dim VRF; 
+  {
   } >ram_il
 % endif
 

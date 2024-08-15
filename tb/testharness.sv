@@ -164,7 +164,7 @@ module testharness #(
       .FPU(FPU),
       .ZFINX(ZFINX),
       .X_EXT(X_EXT),
-      .EXT_XBAR_NMASTER(HEEP_EXT_XBAR_NMASTER)              // Parametro da modificare (+2) per porte master sul bus
+      .EXT_XBAR_NMASTER(HEEP_EXT_XBAR_NMASTER)
   ) x_heep_system_i (
       .clk_i,
       .rst_ni,
