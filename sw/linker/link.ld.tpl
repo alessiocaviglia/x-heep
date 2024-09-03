@@ -34,6 +34,11 @@ MEMORY
 
 SECTIONS
 {
+   /* Reserve the first 0x200 bytes of ram1 for VECTOR REGISTER FILE */
+  .reserved_vrf (NOLOAD) : {
+    . = . + 0x200;
+  } > ram1
+  
   /* we want a fixed entry point */
   PROVIDE(__boot_address = 0x180);
 

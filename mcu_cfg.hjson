@@ -23,7 +23,9 @@
                 lenght: 0x00000C800, #minimum size for freeRTOS and clang
             }
             data: {
-                address: 0x00000C800,
+                //address: 0x00000C800,
+                // changed to reserve space for VRF
+                address: 0x00000CA00,
                 lenght: whatisleft, #keyword used to calculate the size as: ram.length - code.lenght
             }
         },
