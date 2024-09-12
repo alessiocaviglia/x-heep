@@ -24,16 +24,9 @@ module cpu_subsystem
     input  obi_resp_t core_instr_resp_i,
 
     // Data memory interface
-`ifdef TWO_DATAIFS
-    output obi_req_t  [1:0] core_data_req_o,
-    input  obi_resp_t [1:0] core_data_resp_i,
-`elsif THREE_DATAIFS
-    output obi_req_t  [2:0] core_data_req_o,
-    input  obi_resp_t [2:0] core_data_resp_i,
-`else
-    output obi_req_t  core_data_req_o,
-    input  obi_resp_t core_data_resp_i,
-`endif
+    output obi_req_t  [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_req_o,
+    input  obi_resp_t [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_resp_i,
+
 
     // eXtension interface
     if_xif.cpu_compressed xif_compressed_if,
@@ -55,7 +48,6 @@ module cpu_subsystem
     output logic core_sleep_o
 );
 
-
   // CPU Control Signals
   logic fetch_enable;
 
@@ -64,6 +56,34 @@ module cpu_subsystem
   assign core_instr_req_o.wdata = '0;
   assign core_instr_req_o.we    = '0;
   assign core_instr_req_o.be    = 4'b1111;
+
+  // Generation of signal to interface the vectorized requests with the vectorized core
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0]       vec_data_req_o;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0]       vec_data_gnt_i;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0]       vec_data_rvalid_i;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0]       vec_data_we_o;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0][ 3:0] vec_data_be_o;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0][31:0] vec_data_addr_o;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0][31:0] vec_data_wdata_o;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0][31:0] vec_data_rdata_i;
+  logic [core_v_mini_mcu_pkg::NUM_IFS-1:0]       vec_data_err_i;
+  genvar i;
+  generate
+    if (CPU_TYPE == vcv32e20) begin : gen_vcv32e20_dataif
+      for (i = 0; i < core_v_mini_mcu_pkg::NUM_IFS; i++) begin : extract_signals
+        assign core_data_req_o[i].req   = vec_data_req_o[i];
+        assign core_data_req_o[i].we    = vec_data_we_o[i];
+        assign core_data_req_o[i].be    = vec_data_be_o[i];
+        assign core_data_req_o[i].addr  = vec_data_addr_o[i];
+        assign core_data_req_o[i].wdata = vec_data_wdata_o[i];
+
+        assign vec_data_rdata_i[i]  = core_data_resp_i[i].rdata;
+        assign vec_data_gnt_i[i]    = core_data_resp_i[i].gnt;
+        assign vec_data_rvalid_i[i] = core_data_resp_i[i].rvalid;
+        assign vec_data_err_i[i]    = 1'b0;  // Replace with appropriate signal if needed
+      end
+    end
+  endgenerate
 
   if (CPU_TYPE == cv32e20) begin : gen_cv32e20
 
@@ -87,14 +107,14 @@ module cpu_subsystem
         .instr_rvalid_i(core_instr_resp_i.rvalid),
         .instr_err_i   (1'b0),
 
-        .data_addr_o  (core_data_req_o.addr),
-        .data_wdata_o (core_data_req_o.wdata),
-        .data_we_o    (core_data_req_o.we),
-        .data_req_o   (core_data_req_o.req),
-        .data_be_o    (core_data_req_o.be),
-        .data_rdata_i (core_data_resp_i.rdata),
-        .data_gnt_i   (core_data_resp_i.gnt),
-        .data_rvalid_i(core_data_resp_i.rvalid),
+        .data_addr_o  (core_data_req_o[0].addr),
+        .data_wdata_o (core_data_req_o[0].wdata),
+        .data_we_o    (core_data_req_o[0].we),
+        .data_req_o   (core_data_req_o[0].req),
+        .data_be_o    (core_data_req_o[0].be),
+        .data_rdata_i (core_data_resp_i[0].rdata),
+        .data_gnt_i   (core_data_resp_i[0].gnt),
+        .data_rvalid_i(core_data_resp_i[0].rvalid),
         .data_err_i   (1'b0),
 
         .irq_software_i(irq_i[3]),
@@ -119,7 +139,8 @@ module cpu_subsystem
     vcve2_top #(
 `ifndef POST_SYN_SIM
         .DmHaltAddr(DM_HALTADDRESS),
-        .DmExceptionAddr('0)
+        .DmExceptionAddr('0),
+        .NumIfs(core_v_mini_mcu_pkg::NUM_IFS)
 `endif  // POST_SYN_SIM
     ) vcv32e20_i (
         .clk_i (clk_i),
@@ -138,46 +159,15 @@ module cpu_subsystem
         .instr_rvalid_i(core_instr_resp_i.rvalid),
         .instr_err_i   (1'b0),
 
-        .data_addr_o  (core_data_req_o.addr),
-        .data_wdata_o (core_data_req_o.wdata),
-        .data_we_o    (core_data_req_o.we),
-        .data_req_o   (core_data_req_o.req),
-        .data_be_o    (core_data_req_o.be),
-        .data_rdata_i (core_data_resp_i.rdata),
-        .data_gnt_i   (core_data_resp_i.gnt),
-        .data_rvalid_i(core_data_resp_i.rvalid),
-        .data_err_i   (1'b0),
-
-`ifdef TWO_DATAIFS
-        .data_addr_o1  (core_data_req_o[1].addr),
-        .data_wdata_o1 (core_data_req_o[1].wdata),
-        .data_we_o1    (core_data_req_o[1].we),
-        .data_req_o1   (core_data_req_o[1].req),
-        .data_be_o1    (core_data_req_o[1].be),
-        .data_rdata_i1 (core_data_resp_i[1].rdata),
-        .data_gnt_i1   (core_data_resp_i[1].gnt),
-        .data_rvalid_i1(core_data_resp_i[1].rvalid),
-        .data_err_i1   (1'b0),
-`elsif THREE_DATAIFS
-        .data_addr_o1  (core_data_req_o[1].addr),
-        .data_wdata_o1 (core_data_req_o[1].wdata),
-        .data_we_o1    (core_data_req_o[1].we),
-        .data_req_o1   (core_data_req_o[1].req),
-        .data_be_o1    (core_data_req_o[1].be),
-        .data_rdata_i1 (core_data_resp_i[1].rdata),
-        .data_gnt_i1   (core_data_resp_i[1].gnt),
-        .data_rvalid_i1(core_data_resp_i[1].rvalid),
-        .data_err_i1   (1'b0),
-        .data_addr_o2  (core_data_req_o[2].addr),
-        .data_wdata_o2 (core_data_req_o[2].wdata),
-        .data_we_o2    (core_data_req_o[2].we),
-        .data_req_o2   (core_data_req_o[2].req),
-        .data_be_o2    (core_data_req_o[2].be),
-        .data_rdata_i2 (core_data_resp_i[2].rdata),
-        .data_gnt_i2   (core_data_resp_i[2].gnt),
-        .data_rvalid_i2(core_data_resp_i[2].rvalid),
-        .data_err_i2   (1'b0),
-`endif
+        .data_addr_o  (vec_data_addr_o),
+        .data_wdata_o (vec_data_wdata_o),
+        .data_we_o    (vec_data_we_o),
+        .data_req_o   (vec_data_req_o),
+        .data_be_o    (vec_data_be_o),
+        .data_rdata_i (vec_data_rdata_i),
+        .data_gnt_i   (vec_data_gnt_i),
+        .data_rvalid_i(vec_data_rvalid_i),
+        .data_err_i   (vec_data_err_i),
 
         .irq_software_i(irq_i[3]),
         .irq_timer_i   (irq_i[7]),
@@ -230,18 +220,18 @@ module cpu_subsystem
         .instr_err_i    (1'b0),
 
         // Data memory interface
-        .data_req_o    (core_data_req_o.req),
-        .data_gnt_i    (core_data_resp_i.gnt),
-        .data_rvalid_i (core_data_resp_i.rvalid),
-        .data_addr_o   (core_data_req_o.addr),
-        .data_be_o     (core_data_req_o.be),
-        .data_we_o     (core_data_req_o.we),
-        .data_wdata_o  (core_data_req_o.wdata),
+        .data_req_o    (core_data_req_o[0].req),
+        .data_gnt_i    (core_data_resp_i[0].gnt),
+        .data_rvalid_i (core_data_resp_i[0].rvalid),
+        .data_addr_o   (core_data_req_o[0].addr),
+        .data_be_o     (core_data_req_o[0].be),
+        .data_we_o     (core_data_req_o[0].we),
+        .data_wdata_o  (core_data_req_o[0].wdata),
         .data_memtype_o(),
         .data_prot_o   (),
         .data_dbg_o    (),
         .data_atop_o   (),
-        .data_rdata_i  (core_data_resp_i.rdata),
+        .data_rdata_i  (core_data_resp_i[0].rdata),
         .data_err_i    (1'b0),
         .data_exokay_i (1'b1),
 
@@ -323,14 +313,14 @@ module cpu_subsystem
         .instr_gnt_i   (core_instr_resp_i.gnt),
         .instr_rvalid_i(core_instr_resp_i.rvalid),
 
-        .data_addr_o  (core_data_req_o.addr),
-        .data_wdata_o (core_data_req_o.wdata),
-        .data_we_o    (core_data_req_o.we),
-        .data_req_o   (core_data_req_o.req),
-        .data_be_o    (core_data_req_o.be),
-        .data_rdata_i (core_data_resp_i.rdata),
-        .data_gnt_i   (core_data_resp_i.gnt),
-        .data_rvalid_i(core_data_resp_i.rvalid),
+        .data_addr_o  (core_data_req_o[0].addr),
+        .data_wdata_o (core_data_req_o[0].wdata),
+        .data_we_o    (core_data_req_o[0].we),
+        .data_req_o   (core_data_req_o[0].req),
+        .data_be_o    (core_data_req_o[0].be),
+        .data_rdata_i (core_data_resp_i[0].rdata),
+        .data_gnt_i   (core_data_resp_i[0].gnt),
+        .data_rvalid_i(core_data_resp_i[0].rvalid),
 
         // CORE-V-XIF
         // Compressed interface
@@ -406,14 +396,14 @@ module cpu_subsystem
         .instr_gnt_i   (core_instr_resp_i.gnt),
         .instr_rvalid_i(core_instr_resp_i.rvalid),
 
-        .data_addr_o  (core_data_req_o.addr),
-        .data_wdata_o (core_data_req_o.wdata),
-        .data_we_o    (core_data_req_o.we),
-        .data_req_o   (core_data_req_o.req),
-        .data_be_o    (core_data_req_o.be),
-        .data_rdata_i (core_data_resp_i.rdata),
-        .data_gnt_i   (core_data_resp_i.gnt),
-        .data_rvalid_i(core_data_resp_i.rvalid),
+        .data_addr_o  (core_data_req_o[0].addr),
+        .data_wdata_o (core_data_req_o[0].wdata),
+        .data_we_o    (core_data_req_o[0].we),
+        .data_req_o   (core_data_req_o[0].req),
+        .data_be_o    (core_data_req_o[0].be),
+        .data_rdata_i (core_data_resp_i[0].rdata),
+        .data_gnt_i   (core_data_resp_i[0].gnt),
+        .data_rvalid_i(core_data_resp_i[0].rvalid),
 
         .irq_i    (irq_i),
         .irq_ack_o(irq_ack_o),

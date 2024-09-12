@@ -34,16 +34,9 @@ ${pad.core_v_mini_mcu_interface}
     output reg_req_t pad_req_o,
     input  reg_rsp_t pad_resp_i,
 
-`ifdef TWO_DATAIFS
-    input  obi_req_t  [EXT_XBAR_NMASTER_RND-2:0] ext_xbar_master_req_i,
-    output obi_resp_t [EXT_XBAR_NMASTER_RND-2:0] ext_xbar_master_resp_o,
-`elsif THREE_DATAIFS
-    input  obi_req_t  [EXT_XBAR_NMASTER_RND-3:0] ext_xbar_master_req_i,
-    output obi_resp_t [EXT_XBAR_NMASTER_RND-3:0] ext_xbar_master_resp_o,
-'else
-    input  obi_req_t  [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_req_i,
-    output obi_resp_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_resp_o,
-'endif
+    // The real external ports, to get the correct number we don't count the additional core ports
+    input obi_req_t [EXT_XBAR_NMASTER_RND - core_v_mini_mcu_pkg::NUM_IFS:0] ext_xbar_master_req_i,
+    output obi_resp_t [EXT_XBAR_NMASTER_RND - core_v_mini_mcu_pkg::NUM_IFS:0] ext_xbar_master_resp_o,
 
     // External slave ports
     output obi_req_t  ext_core_instr_req_o,
@@ -104,26 +97,13 @@ ${pad.core_v_mini_mcu_interface}
   obi_req_t core_instr_req;
   obi_resp_t core_instr_resp;
 
-  // Signal added to include the additional core data ports in the vecto
-`ifdef TWO_DATAIFS
+  // Signal added to include the additional core data ports in the vector
   obi_req_t  [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_req;
   obi_resp_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_resp;
-`elsif THREE_DATAIFS
-  obi_req_t  [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_req;
-  obi_resp_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_resp;
-'endif
 
   // Vector of the core data ports
-`ifdef TWO_DATAIFS
-  obi_req_t  [1:0] core_data_req;
-  obi_resp_t [1:0] core_data_resp;
-`elsif THREE_DATAIFS
-  obi_req_t  [2:0] core_data_req;
-  obi_resp_t [2:0] core_data_resp;
-'else
-  obi_req_t core_data_req;
-  obi_resp_t core_data_resp;
-'endif
+  obi_req_t [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_req;
+  obi_resp_t [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_resp;
 
   obi_req_t debug_master_req;
   obi_resp_t debug_master_resp;
@@ -244,8 +224,8 @@ ${pad.core_v_mini_mcu_interface}
       .rst_ni(cpu_subsystem_rst_n),
       .core_instr_req_o(core_instr_req),
       .core_instr_resp_i(core_instr_resp),
-      .core_data_req_o(core_data_req),        // transforma in vettore VEC[]
-      .core_data_resp_i(core_data_resp),      // transforma in vettore VEC[]
+      .core_data_req_o(core_data_req),
+      .core_data_resp_i(core_data_resp),
       .xif_compressed_if,
       .xif_issue_if,
       .xif_commit_if,
@@ -277,23 +257,18 @@ ${pad.core_v_mini_mcu_interface}
   );
 
   // To support mltiple data ports for the core we exploit the already present vector of requests and responses
-`ifdef TWO_DATAIFS
-  // added core ports
-  assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-1] = core_data_req[1];
-  assign ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-1] = core_data_resp[1];
-  // real external ports
-  assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-2:0] = ext_xbar_master_req_i;
-  assign ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-2:0] = ext_xbar_master_resp_i;
-`elsif THREE_DATAIFS
-  // added core ports
-  assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-2] = core_data_req[1];
-  assign ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-2] = core_data_resp[1];
-  assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-1] = core_data_req[2];
-  assign ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-1] = core_data_resp[2];
-  // real external ports
-  assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-3:0] = ext_xbar_master_req_i;
-  assign ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-3:0] = ext_xbar_master_resp_i;
-'endif
+  generate
+    genvar i;
+    // If present add to the vector the additional ports of the core
+    for (i = 1; i < core_v_mini_mcu_pkg::NUM_IFS; i++) begin : gen_core_req_resp
+      assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-i]  = core_data_req[i];
+      assign core_data_resp[i] = ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-i];
+    end
+    // External ports assignment
+    assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-core_v_mini_mcu_pkg::NUM_IFS:0]  = ext_xbar_master_req_i;
+    assign ext_xbar_master_resp_o = ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-core_v_mini_mcu_pkg::NUM_IFS:0];
+  endgenerate
+
 
   system_bus #(
       .NUM_BANKS(core_v_mini_mcu_pkg::NUM_BANKS),
@@ -304,16 +279,8 @@ ${pad.core_v_mini_mcu_interface}
       .core_instr_req_i(core_instr_req),
       .core_instr_resp_o(core_instr_resp),
 
-`ifdef TWO_DATAIFS
       .core_data_req_i(core_data_req[0]),
       .core_data_resp_o(core_data_resp[0]),
-`elsif THREE_DATAIFS
-      .core_data_req_i(core_data_req[0]),
-      .core_data_resp_o(core_data_resp[0]),
-'else
-      .core_data_req_i(core_data_req),
-      .core_data_resp_o(core_data_resp),
-'endif
 
       .core_data_req_i(core_data_req),
       .core_data_resp_o(core_data_resp),
@@ -326,16 +293,8 @@ ${pad.core_v_mini_mcu_interface}
       .dma_addr_ch0_req_i(dma_addr_ch0_req),
       .dma_addr_ch0_resp_o(dma_addr_ch0_resp),
 
-`ifdef TWO_DATAIFS
       .ext_xbar_master_req_i(ext_xbar_master_req),
       .ext_xbar_master_resp_o(ext_xbar_master_resp),
-`elsif THREE_DATAIFS
-      .ext_xbar_master_req_i(ext_xbar_master_req),
-      .ext_xbar_master_resp_o(ext_xbar_master_resp),
-'else
-      .ext_xbar_master_req_i(ext_xbar_master_req_i),            // I primi n-2 rimangono come sono, aggiungine due elementi che saranno connessi a VEC[1] e VEC[2]
-      .ext_xbar_master_resp_o(ext_xbar_master_resp_o),          // I primi n-2 rimangono come sono, aggiungine due elementi che saranno connessi a VEC[1] e VEC[2]
-'endif
 
       .ram_req_o(ram_slave_req),
       .ram_resp_i(ram_slave_resp),
