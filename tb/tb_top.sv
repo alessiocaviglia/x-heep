@@ -55,7 +55,7 @@ module tb_top #(
   initial begin
     if ($test$plusargs("vcd")) begin
       $dumpfile("waveform.vcd");
-      $dumpvars(0, tb_top);
+      $dumpvars(0, tb_top);  // cambia e passa solo quello che interessa a me
     end
   end
 
