@@ -21,6 +21,7 @@ MEMORY
      allowing initialized sections to be placed there). Infact we dump all
      sections to ram. */
   ram0 (rwxai) : ORIGIN = 0x${linker_onchip_code_start_address}, LENGTH = 0x${linker_onchip_code_size_address}
+  % aggiungi sezione di 32 KB, assicurati che sia allineato o con operazione o altro
   ram1 (rwxai) : ORIGIN = 0x${linker_onchip_data_start_address}, LENGTH = 0x${linker_onchip_data_size_address}
 % if ram_numbanks_cont > 1 and ram_numbanks_il > 0:
   ram_il (rwxai) : ORIGIN = 0x${linker_onchip_il_start_address}, LENGTH = 0x${linker_onchip_il_size_address}
