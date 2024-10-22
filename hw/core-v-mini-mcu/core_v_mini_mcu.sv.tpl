@@ -269,7 +269,6 @@ ${pad.core_v_mini_mcu_interface}
     assign ext_xbar_master_resp_o = ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-core_v_mini_mcu_pkg::NUM_IFS:0];
   endgenerate
 
-
   system_bus #(
       .NUM_BANKS(core_v_mini_mcu_pkg::NUM_BANKS),
       .EXT_XBAR_NMASTER(EXT_XBAR_NMASTER)
@@ -282,8 +281,6 @@ ${pad.core_v_mini_mcu_interface}
       .core_data_req_i(core_data_req[0]),
       .core_data_resp_o(core_data_resp[0]),
 
-      .core_data_req_i(core_data_req),
-      .core_data_resp_o(core_data_resp),
       .debug_master_req_i(debug_master_req),
       .debug_master_resp_o(debug_master_resp),
       .dma_read_ch0_req_i(dma_read_ch0_req),
