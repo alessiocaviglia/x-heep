@@ -280,8 +280,9 @@ module core_v_mini_mcu
     output reg_req_t pad_req_o,
     input  reg_rsp_t pad_resp_i,
 
-    input  obi_req_t  [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_req_i,
-    output obi_resp_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_resp_o,
+    // The real external ports, to get the correct number we don't count the additional core ports
+    input obi_req_t [EXT_XBAR_NMASTER_RND - core_v_mini_mcu_pkg::NUM_IFS:0] ext_xbar_master_req_i,
+    output obi_resp_t [EXT_XBAR_NMASTER_RND - core_v_mini_mcu_pkg::NUM_IFS:0] ext_xbar_master_resp_o,
 
     // External slave ports
     output obi_req_t  ext_core_instr_req_o,
@@ -341,8 +342,15 @@ module core_v_mini_mcu
   // masters signals
   obi_req_t core_instr_req;
   obi_resp_t core_instr_resp;
-  obi_req_t core_data_req;
-  obi_resp_t core_data_resp;
+
+  // Signal added to include the additional core data ports in the vector
+  obi_req_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_req;
+  obi_resp_t [EXT_XBAR_NMASTER_RND-1:0] ext_xbar_master_resp;
+
+  // Vector of the core data ports
+  obi_req_t [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_req;
+  obi_resp_t [core_v_mini_mcu_pkg::NUM_IFS-1:0] core_data_resp;
+
   obi_req_t debug_master_req;
   obi_resp_t debug_master_resp;
   obi_req_t dma_read_ch0_req;
@@ -494,26 +502,43 @@ module core_v_mini_mcu
       .debug_master_resp_i(debug_master_resp)
   );
 
+  // To support mltiple data ports for the core we exploit the already present vector of requests and responses
+  generate
+    genvar i;
+    // If present add to the vector the additional ports of the core
+    for (i = 1; i < core_v_mini_mcu_pkg::NUM_IFS; i++) begin : gen_core_req_resp
+      assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-i] = core_data_req[i];
+      assign core_data_resp[i] = ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-i];
+    end
+    // External ports assignment
+    assign ext_xbar_master_req[EXT_XBAR_NMASTER_RND-core_v_mini_mcu_pkg::NUM_IFS:0]  = ext_xbar_master_req_i;
+    assign ext_xbar_master_resp_o = ext_xbar_master_resp[EXT_XBAR_NMASTER_RND-core_v_mini_mcu_pkg::NUM_IFS:0];
+  endgenerate
+
   system_bus #(
       .NUM_BANKS(core_v_mini_mcu_pkg::NUM_BANKS),
       .EXT_XBAR_NMASTER(EXT_XBAR_NMASTER)
   ) system_bus_i (
       .clk_i,
       .rst_ni,
-      .core_instr_req_i(core_instr_req),
+      .core_instr_req_i (core_instr_req),
       .core_instr_resp_o(core_instr_resp),
-      .core_data_req_i(core_data_req),
-      .core_data_resp_o(core_data_resp),
-      .debug_master_req_i(debug_master_req),
-      .debug_master_resp_o(debug_master_resp),
-      .dma_read_ch0_req_i(dma_read_ch0_req),
-      .dma_read_ch0_resp_o(dma_read_ch0_resp),
-      .dma_write_ch0_req_i(dma_write_ch0_req),
+
+      .core_data_req_i (core_data_req[0]),
+      .core_data_resp_o(core_data_resp[0]),
+
+      .debug_master_req_i  (debug_master_req),
+      .debug_master_resp_o (debug_master_resp),
+      .dma_read_ch0_req_i  (dma_read_ch0_req),
+      .dma_read_ch0_resp_o (dma_read_ch0_resp),
+      .dma_write_ch0_req_i (dma_write_ch0_req),
       .dma_write_ch0_resp_o(dma_write_ch0_resp),
-      .dma_addr_ch0_req_i(dma_addr_ch0_req),
-      .dma_addr_ch0_resp_o(dma_addr_ch0_resp),
-      .ext_xbar_master_req_i(ext_xbar_master_req_i),
-      .ext_xbar_master_resp_o(ext_xbar_master_resp_o),
+      .dma_addr_ch0_req_i  (dma_addr_ch0_req),
+      .dma_addr_ch0_resp_o (dma_addr_ch0_resp),
+
+      .ext_xbar_master_req_i (ext_xbar_master_req),
+      .ext_xbar_master_resp_o(ext_xbar_master_resp),
+
       .ram_req_o(ram_slave_req),
       .ram_resp_i(ram_slave_resp),
       .debug_slave_req_o(debug_slave_req),
