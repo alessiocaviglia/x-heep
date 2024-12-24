@@ -313,6 +313,11 @@ def main():
 
     # Parse arguments.
 
+    # Added parametric number of data memory interfaces
+    parser.add_argument('--NUM_IFS',
+                        metavar="from 1 to 3",
+                        help="Number of interfaces")
+
     parser.add_argument("--cpu",
                         metavar="cv32e20,cv32e40p,cv32e40x,cv32e40px",
                         nargs='?',
@@ -403,6 +408,9 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     outfile = args.outfile
+
+    # Number of data memory interfaces
+    NUM_IFS = args.NUM_IFS
 
     if args.cpu != None and args.cpu != '':
         cpu_type = args.cpu
@@ -825,6 +833,7 @@ def main():
     total_pad_list.append(last_pad)
 
     kwargs = {
+        "NUM_IFS"                          : NUM_IFS,           # Number of data memory interfaces
         "cpu_type"                         : cpu_type,
         "bus_type"                         : bus_type,
         "ram_start_address"                : ram_start_address,

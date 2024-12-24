@@ -18,7 +18,7 @@ package core_v_mini_mcu_pkg;
   import addr_map_rule_pkg::*;
 
   // parameter indicating the number of memory interfaces
-  localparam int unsigned NUM_IFS = 2;
+  localparam int unsigned NUM_IFS = ${NUM_IFS};
 
   typedef enum logic [2:0] {
     cv32e40p,
