@@ -21,7 +21,10 @@ MEMORY
      allowing initialized sections to be placed there). Infact we dump all
      sections to ram. */
   ram0 (rwxai) : ORIGIN = 0x${linker_onchip_code_start_address}, LENGTH = 0x${linker_onchip_code_size_address}
-  /* aggiungi sezione di 32 KB, assicurati che sia allineato o con operazione o altro */
+
+  /* Add a new 32KB aligned section */
+  ram_vrf (rwxai) : ORIGIN = 0x${ram_vrf_start_address}, LENGTH = 32K
+
   ram1 (rwxai) : ORIGIN = 0x${linker_onchip_data_start_address}, LENGTH = 0x${linker_onchip_data_size_address}
 % if ram_numbanks_cont > 1 and ram_numbanks_il > 0:
   ram_il (rwxai) : ORIGIN = 0x${linker_onchip_il_start_address}, LENGTH = 0x${linker_onchip_il_size_address}
@@ -35,10 +38,6 @@ MEMORY
 
 SECTIONS
 {
-   /* Reserve the first 0x200 bytes of ram1 for VECTOR REGISTER FILE */
-  .reserved_vrf (NOLOAD) : {
-    . = . + 0x200;
-  } > ram1
   
   /* we want a fixed entry point */
   PROVIDE(__boot_address = 0x180);

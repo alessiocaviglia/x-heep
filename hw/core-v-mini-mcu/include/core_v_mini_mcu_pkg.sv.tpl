@@ -17,6 +17,9 @@ package core_v_mini_mcu_pkg;
 
   import addr_map_rule_pkg::*;
 
+  // Size in bytes of vector registers
+  localparam int unsigned VLEN = ${VLEN};
+
   typedef enum logic [2:0] {
     cv32e40p,
     cv32e20,

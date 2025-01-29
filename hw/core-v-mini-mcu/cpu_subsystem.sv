@@ -111,7 +111,8 @@ module cpu_subsystem
     vcve2_top #(
 `ifndef POST_SYN_SIM
         .DmHaltAddr(DM_HALTADDRESS),
-        .DmExceptionAddr('0)
+        .DmExceptionAddr('0),
+        .VLEN(core_v_mini_mcu_pkg::VLEN)
 `endif  // POST_SYN_SIM
     ) vcv32e20_i (
         .clk_i (clk_i),

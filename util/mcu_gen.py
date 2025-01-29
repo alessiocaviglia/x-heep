@@ -313,6 +313,10 @@ def main():
 
     # Parse arguments.
 
+    parser.add_argument('--VLEN',
+                        metavar="128, 256, 512, 1024",
+                        help="Size of vector registers in bytes")
+
     parser.add_argument("--cpu",
                         metavar="cv32e20,cv32e40p,cv32e40x,cv32e40px",
                         nargs='?',
@@ -403,6 +407,11 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     outfile = args.outfile
+
+    if args.VLEN != None and args.VLEN != '':
+        VLEN = int(args.VLEN)
+    else:
+        VLEN = 128
 
     if args.cpu != None and args.cpu != '':
         cpu_type = args.cpu
@@ -525,7 +534,16 @@ def main():
     if int(linker_onchip_code_size_address,16) < 32*1024:
         exit("The code section must be at least 32KB, instead it is " + str(linker_onchip_code_size_address))
 
-    linker_onchip_data_start_address  = string2int(obj['linker_script']['onchip_ls']['data']['address'])
+    # VRF Section: Align ram_vrf to the next 32KB after ram0
+    ram_vrf_start_address = str('{:08X}'.format(
+        (int(linker_onchip_code_start_address, 16) + int(linker_onchip_code_size_address, 16) + 32*1024 - 1) & ~(32*1024 - 1)
+    ))
+    ram_vrf_size = 32 * 1024  # 32KB
+
+    # Adjust the start address of the ram1 section to be after ram_vrf
+    linker_onchip_data_start_address = str('{:08X}'.format(
+        int(ram_vrf_start_address, 16) + ram_vrf_size
+    ))
     if (obj['linker_script']['onchip_ls']['data']['lenght'].split()[0].split(",")[0] == "whatisleft"):
         if ram_numbanks_il == 0 or (ram_numbanks_cont == 1 and ram_numbanks_il > 0):
             linker_onchip_data_size_address  = str('{:08X}'.format(int(ram_size_address,16) - int(linker_onchip_code_size_address,16)))
@@ -825,6 +843,8 @@ def main():
     total_pad_list.append(last_pad)
 
     kwargs = {
+        "VLEN"                             : VLEN,
+        "ram_vrf_start_address"            : ram_vrf_start_address,
         "cpu_type"                         : cpu_type,
         "bus_type"                         : bus_type,
         "ram_start_address"                : ram_start_address,
