@@ -19,6 +19,8 @@ package core_v_mini_mcu_pkg;
 
   // Size in bytes of vector registers
   localparam int unsigned VLEN = ${VLEN};
+  localparam logic [31:0] VRF_START_ADDR_FULL = 32'h${ram_vrf_start_address};
+  localparam logic [22:0] VRF_START_ADDR = VRF_START_ADDR_FULL[31:9];
 
   typedef enum logic [2:0] {
     cv32e40p,

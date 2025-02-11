@@ -5,9 +5,7 @@
 // Author: Pierre Guillod <pierre.guillod@epfl.ch>, EPFL, STI-SEL
 // Date: 19.02.2022
 
-module pdm2pcm_dummy #(
-    parameter string filepath = "../../../hw/ip/pdm2pcm/tb/signals/pdm.txt"
-) (
+module pdm2pcm_dummy (
     input logic clk_i,
     input logic rst_ni,
 
@@ -18,7 +16,6 @@ module pdm2pcm_dummy #(
     output logic pdm_data_o
 );
 
-  int init;
   int fpdm;
   int lineidx;
   string line;
@@ -31,27 +28,6 @@ module pdm2pcm_dummy #(
       lineidx = 0;
       pdm_data_o <= 0;
     end else begin
-      if (init != 1) begin
-        init = 1;
-        lineidx = 0;
-        fpdm = $fopen(filepath, "r");
-        if (!fpdm) begin
-          $display("Failed to open PDM file.");
-          $display(" > Please check if this the simulation was launched using");
-          $display("   `make *-sim` or `make run-pdm2pcm`.");
-        end
-
-        $fgets(line, fpdm);
-        line = line.substr(0, 0);
-        if (line == "1") begin
-          pdm_data_o <= 1;
-        end else begin
-          pdm_data_o <= 0;
-        end
-
-        pdm_clk_h = 1'b0;
-
-      end
 
       if (pdm_clk_i == 1 & pdm_clk_h == 0) begin
         $fgets(line, fpdm);
