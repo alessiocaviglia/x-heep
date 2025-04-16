@@ -24,7 +24,6 @@ module pdm2pcm_dummy (
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (~rst_ni) begin
-      init = 0;
       lineidx = 0;
       pdm_data_o <= 0;
     end else begin
